@@ -41,10 +41,11 @@ public class EmployeeController {
 	
 	@GetMapping
 	public ResponseEntity<List<EmployeeDTO>> getAllEmployees(){
+		logger.info("Executing getAllEmployees() method");
 		List<EmployeeDTO> res=service.getAllEmployees().stream()
 				.map(EmployeeServiceImpl::toDTO)
 				.collect(Collectors.toList());
-		
+		logger.info("Returning back the getAllEmployees() method response");
 		return new ResponseEntity<List<EmployeeDTO>>(res,HttpStatus.OK);
 	}
 	
@@ -52,21 +53,31 @@ public class EmployeeController {
 	@GetMapping("/{id}")
 	public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable String id){
 		EmployeeDTO res=null;
-		logger.info("Get employee by controller: "+id);
+		logger.info("Executing getEmployeeById() method for id {}",id);
 		try {
 		 res=EmployeeServiceImpl.toDTO(service.getEmployeeById(Long.valueOf(id)));
 		}catch(Exception e) {
+			logger.error("Error while executing getEmployeeById(): {}",e);
 			throw new CustomException(e.getMessage());
 		}
+		logger.info("Returning back the getAllEmployees() method response: {}",res);
 		return new ResponseEntity<EmployeeDTO>(res,HttpStatus.OK);
 	}
 	
 	
 	@PostMapping
 	public ResponseEntity<EmployeeDTO> addNewEmployee(@Valid @RequestBody EmployeeDTO dto){
-		System.out.println(dto);
-		Employee newEmployee = EmployeeServiceImpl.toEntity(dto);
-		EmployeeDTO res=EmployeeServiceImpl.toDTO(service.addEmployee(newEmployee));
+		logger.info("Executing addNewEmployee() method");
+		EmployeeDTO res=null;
+		try {
+			Employee newEmployee = EmployeeServiceImpl.toEntity(dto);
+			res=EmployeeServiceImpl.toDTO(service.addEmployee(newEmployee));
+		}
+		catch(Exception ex) {
+			logger.error("Error while executing addNewEmployee(): {}",ex);
+			throw new CustomException(ex.getMessage());
+		}
+		logger.info("Returning back the addNewEmployee() method response: {}",res);
 		return new ResponseEntity<EmployeeDTO>(res,HttpStatus.CREATED);
 	}
 	
