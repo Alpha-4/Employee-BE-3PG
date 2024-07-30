@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: docker.elastic.co/logstash/logstash:7.10.0
+        ports:
+          - containerPort: 5044
+        volumeMounts:
+          - name: logstash-pipeline
+            mountPath: /usr/share/logstash/pipeline/logstash.conf
+            subPath: logstash.conf
+      volumes:
+        - name: logstash-pipeline
+          configMap:
+            name: logstash-config
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+data:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch:9200"]
+        index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
+      }
+    }
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+spec:
+  ports:
+    - port: 5044
+      name: beats
+  selector:
+    app: logstash
