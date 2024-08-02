@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: springboot-crud-deployment
+  name: springboot-simple-deployment
 spec:
   selector:
     matchLabels:
@@ -13,7 +13,7 @@ spec:
         app: springboot-k8s-mysql
     spec:
       containers:
-        - name: springboot-crud-k8s
+        - name: springboot-simple-k8s
           image: springboot-crud-k8s:latest
           imagePullPolicy: IfNotPresent
           ports:
@@ -36,7 +36,7 @@ spec:
 apiVersion: v1
 kind: Service 
 metadata:
-  name: springboot-crud-svc
+  name: springboot-simple-svc
 spec:
   selector:
     app: springboot-k8s-mysql
@@ -44,4 +44,4 @@ spec:
     - protocol: "TCP"
       port: 8080 # The port that the service is running on in the cluster
       targetPort: 8080 # The port exposed by the service
-  type: NodePort
+  type: NodePort 
